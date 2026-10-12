@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Sign up{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-md">
+  <h1 class="mb-6 font-serif text-3xl font-bold">Create your account</h1>
+  <form method="post" class="card space-y-5 p-6" novalidate>
+    {% csrf_token %}
+    {% include 'partials/form_fields.html' %}
+    <button class="btn btn-primary w-full">Create account</button>
+  </form>
+  <p class="mt-4 text-sm muted">Already registered? <a href="{% url 'accounts:login' %}" class="font-medium text-teal-700 underline dark:text-teal-300">Log in</a>.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile.user }}{% endblock %}
+{% block content %}
+<div class="card mx-auto max-w-3xl p-6">
+  <div class="flex flex-wrap items-start gap-5">
+    {% include 'partials/avatar.html' with profile=profile size='h-24 w-24 text-3xl' %}
+    <div class="min-w-0 flex-1">
+      <h1 class="font-serif text-3xl font-bold">{{ profile.user }}</h1>
+      <p class="muted">@{{ profile.user.username }}</p>
+      <div class="mt-2 flex flex-wrap gap-2">
+        <span class="badge">{{ profile.user.get_role_display }}</span>
+        {% if profile.graduation_year %}<span class="badge">Class of {{ profile.graduation_year }}</span>{% endif %}
+        {% if profile.department %}<span class="badge">{{ profile.department }}</span>{% endif %}
+      </div>
+    </div>
+    {% if profile.user == user %}<a href="{% url 'accounts:profile_edit' %}" class="btn btn-secondary">Edit profile</a>{% endif %}
+  </div>
+
+  {% if profile.bio %}<p class="mt-6 whitespace-pre-line">{{ profile.bio }}</p>{% endif %}
+
+  <dl class="mt-6 grid gap-4 border-t border-slate-200 pt-6 text-sm sm:grid-cols-2 dark:border-slate-700">
+    {% if profile.job_title or profile.company %}<div><dt class="muted">Work</dt><dd>{{ profile.job_title }}{% if profile.job_title and profile.company %} at {% endif %}{{ profile.company }}</dd></div>{% endif %}
+    {% if profile.location %}<div><dt class="muted">Location</dt><dd>{{ profile.location }}</dd></div>{% endif %}
+    <div><dt class="muted">Email</dt><dd><a class="underline" href="mailto:{{ profile.user.email }}">{{ profile.user.email }}</a></dd></div>
+    {% if profile.linkedin_url %}<div><dt class="muted">LinkedIn</dt><dd><a class="underline" href="{{ profile.linkedin_url }}" rel="noopener noreferrer" target="_blank">{{ profile.linkedin_url }}</a></dd></div>{% endif %}
+    {% if profile.user == user and profile.phone %}<div><dt class="muted">Phone (only you see this)</dt><dd>{{ profile.phone }}</dd></div>{% endif %}
+  </dl>
+</div>
+{% endblock %}

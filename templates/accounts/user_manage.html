@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Manage users{% endblock %}
+{% block content %}
+<h1 class="mb-2 font-serif text-3xl font-bold">Manage users</h1>
+<p class="mb-6 text-sm muted">Staff can create events and moderate job posts. Admins can also change roles.</p>
+<div class="card overflow-x-auto">
+  <table class="w-full text-left text-sm">
+    <thead class="border-b border-slate-200 dark:border-slate-700"><tr>
+      <th class="p-3">User</th><th class="p-3">Email</th><th class="p-3">Role</th></tr></thead>
+    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+    {% for u in users %}
+      <tr>
+        <td class="p-3"><a class="font-medium underline" href="{% url 'accounts:profile' u.username %}">{{ u.username }}</a></td>
+        <td class="p-3 muted">{{ u.email }}</td>
+        <td class="p-3">
+          {% if u == user %}<span class="badge">{{ u.get_role_display }} (you)</span>
+          {% else %}
+          <form method="post" action="{% url 'accounts:change_role' u.pk %}" class="flex items-center gap-2">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <select name="role" class="rounded-md border border-slate-300 bg-white px-2 py-1 dark:border-slate-600 dark:bg-slate-800" aria-label="Role for {{ u.username }}">
+              {% for value, label in roles %}<option value="{{ value }}" {% if u.role == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+            <button class="btn btn-secondary !py-1">Save</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include 'partials/pagination.html' %}
+{% endblock %}

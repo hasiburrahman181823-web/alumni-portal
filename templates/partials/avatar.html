@@ -1,0 +1,5 @@
+{% if profile.avatar %}
+  <img src="{{ profile.avatar.url }}" alt="" class="{{ size|default:'h-10 w-10' }} rounded-full object-cover">
+{% else %}
+  <span class="{{ size|default:'h-10 w-10' }} inline-flex shrink-0 items-center justify-center rounded-full bg-teal-100 font-semibold text-teal-800 dark:bg-teal-900 dark:text-teal-200" aria-hidden="true">{{ profile.user.username|slice:":1"|upper }}</span>
+{% endif %}

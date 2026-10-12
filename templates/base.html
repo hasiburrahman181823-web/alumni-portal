@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Alumni Portal{% endblock %} · Alumni Portal</title>
+
+  {# Apply the saved/OS theme before first paint to avoid a light-mode flash #}
+  <script>
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+
+  {# Tailwind Play CDN: fine for development. For production, build CSS with the Tailwind CLI (see README). #}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['"Source Serif 4"', 'Georgia', 'serif'],
+      } } }
+    };
+  </script>
+  <style type="text/tailwindcss">
+    @layer components {
+      .btn { @apply inline-flex items-center justify-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900; }
+      .btn-primary { @apply bg-teal-700 text-white hover:bg-teal-800; }
+      .btn-secondary { @apply border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700; }
+      .btn-danger { @apply bg-red-600 text-white hover:bg-red-700; }
+      .card { @apply rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800; }
+      .badge { @apply inline-flex items-center rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-800 dark:bg-teal-900/40 dark:text-teal-200; }
+      .muted { @apply text-slate-500 dark:text-slate-400; }
+      .nav-link { @apply rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white; }
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased dark:bg-slate-900 dark:text-slate-100">
+
+  <header class="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
+    <nav class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-2 gap-y-2 px-4 py-3" aria-label="Main">
+      <a href="{% url 'home' %}" class="mr-4 font-serif text-xl font-bold text-teal-800 dark:text-teal-300">Alumni Portal</a>
+
+      {% if user.is_authenticated %}
+        <a href="{% url 'portal:job_list' %}" class="nav-link">Jobs</a>
+        <a href="{% url 'portal:event_list' %}" class="nav-link">Events</a>
+        <a href="{% url 'accounts:alumni_list' %}" class="nav-link">Alumni</a>
+        {% if user.is_admin_role %}<a href="{% url 'accounts:user_manage' %}" class="nav-link">Manage users</a>{% endif %}
+      {% endif %}
+
+      <div class="ml-auto flex items-center gap-2">
+        <button type="button" id="theme-toggle" class="btn btn-secondary !px-3" aria-label="Toggle dark mode">
+          <span class="dark:hidden">Dark</span><span class="hidden dark:inline">Light</span>
+        </button>
+        {% if user.is_authenticated %}
+          <a href="{% url 'accounts:profile' user.username %}" class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-slate-100 dark:hover:bg-slate-700">
+            {% include 'partials/avatar.html' with profile=user.profile size='h-8 w-8 text-sm' %}
+            <span class="hidden text-sm font-medium sm:inline">{{ user.username }}</span>
+          </a>
+          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn btn-secondary">Log out</button></form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="btn btn-secondary">Log in</a>
+          <a href="{% url 'accounts:register' %}" class="btn btn-primary">Sign up</a>
+        {% endif %}
+      </div>
+    </nav>
+  </header>
+
+  {% if messages %}
+  <div class="mx-auto mt-4 w-full max-w-6xl space-y-2 px-4" role="status">
+    {% for message in messages %}
+      <div class="rounded-md border px-4 py-3 text-sm
+        {% if message.tags == 'error' %}border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200
+        {% elif message.tags == 'success' %}border-teal-200 bg-teal-50 text-teal-900 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-100
+        {% else %}border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="border-t border-slate-200 py-6 text-center text-sm muted dark:border-slate-700">
+    &copy; {% now "Y" %} Alumni Portal
+  </footer>
+
+  <script>
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      const dark = document.documentElement.classList.toggle('dark');
+      localStorage.theme = dark ? 'dark' : 'light';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Jobs{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <h1 class="font-serif text-3xl font-bold">{% if mine %}My job posts{% else %}Jobs{% endif %}</h1>
+  <div class="flex gap-2">
+    {% if mine %}<a href="{% url 'portal:job_list' %}" class="btn btn-secondary">All jobs</a>
+    {% else %}<a href="?mine=1" class="btn btn-secondary">My posts</a>{% endif %}
+    <a href="{% url 'portal:job_create' %}" class="btn btn-primary">Post a job</a>
+  </div>
+</div>
+
+<form method="get" class="mb-6 flex flex-wrap gap-3">
+  {% if mine %}<input type="hidden" name="mine" value="1">{% endif %}
+  <input type="search" name="q" value="{{ q }}" placeholder="Title, company or keyword" class="w-full max-w-xs rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800" aria-label="Search jobs">
+  <input type="text" name="location" value="{{ location }}" placeholder="Location" class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800" aria-label="Location">
+  <select name="type" class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800" aria-label="Job type">
+    <option value="">All types</option>
+    {% for value, label in job_types %}<option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <button class="btn btn-primary">Search</button>
+  {% if q or location or selected_type %}<a href="{% url 'portal:job_list' %}{% if mine %}?mine=1{% endif %}" class="btn btn-secondary">Clear</a>{% endif %}
+</form>
+
+<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+  {% for job in jobs %}
+    <a href="{{ job.get_absolute_url }}" class="card block p-5 hover:border-teal-600">
+      <div class="flex items-start justify-between gap-2">
+        <h2 class="font-medium">{{ job.title }}</h2>
+        <span class="badge shrink-0">{{ job.get_job_type_display }}</span>
+      </div>
+      <p class="mt-1 text-sm muted">{{ job.company }} · {{ job.location }}</p>
+      <p class="mt-3 line-clamp-3 text-sm">{{ job.description|truncatewords:30 }}</p>
+      <p class="mt-3 text-xs muted">Posted {{ job.created_at|timesince }} ago{% if not job.is_active %} · Closed{% endif %}</p>
+    </a>
+  {% empty %}
+    <p class="muted md:col-span-2 lg:col-span-3">No jobs match. Try fewer filters, or <a class="underline" href="{% url 'portal:job_create' %}">post one</a>.</p>
+  {% endfor %}
+</div>
+{% include 'partials/pagination.html' %}
+{% endblock %}

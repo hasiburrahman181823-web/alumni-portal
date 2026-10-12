@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.title }}{% endblock %}
+{% block content %}
+<article class="card mx-auto max-w-3xl overflow-hidden">
+  {% if event.cover_image %}<img src="{{ event.cover_image.url }}" alt="" class="h-64 w-full object-cover">{% endif %}
+  <div class="p-6">
+    <h1 class="font-serif text-3xl font-bold">{{ event.title }}</h1>
+    <p class="mt-2 font-medium text-teal-700 dark:text-teal-300">
+      {{ event.start_at|date:"l, j F Y, g:i A" }}{% if event.end_at %} to {{ event.end_at|date:"g:i A" }}{% endif %}
+    </p>
+    <p class="muted">{{ event.location }}</p>
+    <div class="mt-6 whitespace-pre-line">{{ event.description }}</div>
+
+    {% if user.can_manage_content %}
+    <div class="mt-6 flex gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
+      <a href="{% url 'portal:event_update' event.pk %}" class="btn btn-secondary">Edit</a>
+      <a href="{% url 'portal:event_delete' event.pk %}" class="btn btn-secondary text-red-700 dark:text-red-400">Delete</a>
+    </div>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}

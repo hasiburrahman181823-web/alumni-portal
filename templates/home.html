@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="mb-10 max-w-2xl">
+  <h1 class="font-serif text-4xl font-bold leading-tight sm:text-5xl">Stay close to the people you graduated with.</h1>
+  <p class="mt-4 text-lg muted">Find fellow alumni, share job openings, and get invited to reunions and talks.</p>
+  {% if not user.is_authenticated %}
+    <div class="mt-6 flex gap-3">
+      <a href="{% url 'accounts:register' %}" class="btn btn-primary">Create your profile</a>
+      <a href="{% url 'accounts:login' %}" class="btn btn-secondary">Log in</a>
+    </div>
+  {% endif %}
+</section>
+
+<dl class="mb-10 grid grid-cols-3 gap-4">
+  <div class="card p-4"><dt class="text-sm muted">Alumni</dt><dd class="font-serif text-3xl font-bold">{{ alumni_count }}</dd></div>
+  <div class="card p-4"><dt class="text-sm muted">Open jobs</dt><dd class="font-serif text-3xl font-bold">{{ job_count }}</dd></div>
+  <div class="card p-4"><dt class="text-sm muted">Upcoming events</dt><dd class="font-serif text-3xl font-bold">{{ event_count }}</dd></div>
+</dl>
+
+{% if user.is_authenticated %}
+<div class="grid gap-8 lg:grid-cols-2">
+  <section>
+    <div class="mb-3 flex items-center justify-between">
+      <h2 class="font-serif text-2xl font-bold">Latest jobs</h2>
+      <a href="{% url 'portal:job_list' %}" class="text-sm font-medium text-teal-700 hover:underline dark:text-teal-300">All jobs</a>
+    </div>
+    <ul class="card divide-y divide-slate-200 dark:divide-slate-700">
+      {% for job in latest_jobs %}
+        <li><a href="{{ job.get_absolute_url }}" class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+          <p class="font-medium">{{ job.title }}</p>
+          <p class="text-sm muted">{{ job.company }} · {{ job.location }}</p>
+        </a></li>
+      {% empty %}
+        <li class="p-4 text-sm muted">No jobs yet. <a class="text-teal-700 underline dark:text-teal-300" href="{% url 'portal:job_create' %}">Post the first one.</a></li>
+      {% endfor %}
+    </ul>
+  </section>
+  <section>
+    <div class="mb-3 flex items-center justify-between">
+      <h2 class="font-serif text-2xl font-bold">Upcoming events</h2>
+      <a href="{% url 'portal:event_list' %}" class="text-sm font-medium text-teal-700 hover:underline dark:text-teal-300">All events</a>
+    </div>
+    <ul class="card divide-y divide-slate-200 dark:divide-slate-700">
+      {% for event in upcoming_events %}
+        <li><a href="{{ event.get_absolute_url }}" class="block p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+          <p class="font-medium">{{ event.title }}</p>
+          <p class="text-sm muted">{{ event.start_at|date:"D, j M Y, g:i A" }} · {{ event.location }}</p>
+        </a></li>
+      {% empty %}
+        <li class="p-4 text-sm muted">No upcoming events.</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endif %}
+{% endblock %}

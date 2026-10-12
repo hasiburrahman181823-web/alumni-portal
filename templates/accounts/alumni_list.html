@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Alumni{% endblock %}
+{% block content %}
+<h1 class="mb-6 font-serif text-3xl font-bold">Alumni directory</h1>
+<form method="get" class="mb-6 flex flex-wrap gap-3">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search by name, company, city…" class="w-full max-w-xs rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800" aria-label="Search alumni">
+  <select name="year" class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800" aria-label="Graduation year">
+    <option value="">All years</option>
+    {% for y in years %}<option value="{{ y }}" {% if year == y|stringformat:"s" %}selected{% endif %}>Class of {{ y }}</option>{% endfor %}
+  </select>
+  <button class="btn btn-primary">Search</button>
+  {% if q or year %}<a href="{% url 'accounts:alumni_list' %}" class="btn btn-secondary">Clear</a>{% endif %}
+</form>
+
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  {% for p in profiles %}
+    <a href="{{ p.get_absolute_url }}" class="card flex gap-4 p-4 hover:border-teal-600">
+      {% include 'partials/avatar.html' with profile=p size='h-14 w-14 text-lg' %}
+      <div class="min-w-0">
+        <p class="truncate font-medium">{{ p.user }}</p>
+        <p class="truncate text-sm muted">{{ p.job_title }}{% if p.job_title and p.company %} · {% endif %}{{ p.company }}</p>
+        <p class="text-xs muted">{% if p.graduation_year %}Class of {{ p.graduation_year }}{% endif %}{% if p.location %} · {{ p.location }}{% endif %}</p>
+      </div>
+    </a>
+  {% empty %}
+    <p class="muted">No alumni match your search.</p>
+  {% endfor %}
+</div>
+{% include 'partials/pagination.html' %}
+{% endblock %}
